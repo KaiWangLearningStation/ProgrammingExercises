@@ -36,7 +36,7 @@ namespace ProgrammingExercises100.Exercises
             {
                 if (number < 0)
                 {
-                    return true;
+                    return true; //提前return，能够提高性能
                 }
             }
             return false;
