@@ -15,41 +15,83 @@ namespace ProgrammingExercises100.Exercises
     {
         public void Run()
         {
-            Console.WriteLine("--- 练习 040: 定义基于值的房屋数据结构 ---");
+            Console.WriteLine("--- 练习 055: 使用委托转换数字 ---");
             // 题目描述
-            string line = "定义一个House类型，带有Address属性、FloorArea属性、BedroomCount属性和HasGarage属性。需要满足基于值的相等性、不可变性、ToString方法、解构方法等。";
+            string line = "实现TransformNumbers方法，接收float列表和一个transformation函数，返回一个新的列表，列表中是经过函数变化的内容";
             Console.WriteLine(line);
 
             // 准备一些测试数据
 
-
+            List<float> floatList = new List<float>() { 1.0f, 2.0f, 3.0f};
+            List<float> result1 = NumberTransformer.TransformNumbers1(floatList, item => item * item);
+            List<float> result2 = NumberTransformer.TransformNumbers2(floatList, item => item * item);
+            List<float> result4 = NumberTransformer.TransformNumbers4(floatList, item => item * item);
 
             // 调用你的逻辑方法
 
 
             // 输出结果
 
-
+            foreach (var item in result1)
+            {
+                Console.WriteLine(item);
+            }
+            foreach (var item in result2)
+            {
+                Console.WriteLine(item);
+            }
+            foreach (var item in result4)
+            {
+                Console.WriteLine(item);
+            }
         }
 
 
         //题目知识：
-        // 1. 题目要求：
-        // 基于值的相等性：比较两个House对象时，应该比较它们的属性值，而不是引用。实现IEquatable接口，实现Equals方法
-        // 不可变性：创建后属性值不能更改
-        // ToString方法：提供友好的字符串表示
-        // 解构方法：可以方便地将属性分解到变量中
+        // 1. function作为参数是可以传递给方法的，需要指定这个function的类型，如果是有参数有返回值的就要用Func预定义委托，如果是有参数无返回值的用Action委托。
+        // 2. 传入的委托，实际上可以用来当作方法来调用，在方法内这个委托变量看作是方法，可以用括号调用
+        // 3. 可以用LINQ的Select简化foreach过程，直接return。Select本身就是要传入一个Func委托，这里正好就是传入方法的委托。
+        // 4. lambda表达式是委托的具体内容，但是注意lambda仅定义函数，而本例中函数是作为参数给定的
+        // 5. 也可以不适用预定义Func委托，Func是简单的定义参数和返回值类型的预定义，如果不使用，需要自己手动定义：public delegate float Multi(float num); 表明传入的参数是float，返回类型是float。然后可以把Func<float, float>换成Trans。此时要注意：如果不适用LINQ语法，这样改动后没有变化，transform仍然可以当作方法来用。但是在LINQ中有一些不同，LINQ方法一定要接收一个Func类型的参数，虽然 Multi 委托和 Func<float, float> 的签名（参数和返回值）完全一样，但它们是两种不同的“名义类型（Nominal Types）”，且 C# 不支持从一个委托实例隐式转换为另一个委托类型。可以使用transform.Invoke 是一个方法组（Method Group）。C# 编译器允许将“方法组”自动转换为任何匹配签名的委托类型（包括系统自带的 Func）。
 
-        // 实现1：用类实现
-            // 1. 重写 object.Equals 是必须的：因为很多旧的 API 或非泛型的类库（以及 System.Object 本身）只知道 Equals(object)。如果不重写它，当你把 House 放在非泛型容器里时，逻辑就会出错。重写后，运行时多态会根据实际类型调用Equals方法。
-            // 2. obj as House1：as安全地将object类型转换为House类型，转换成功返回一个House类型的对象，转换失败返回null
-            // 3. 实现IEquatable的Equals(House1? other)方法，调用类型安全的Equals，避免装箱，编译时类型检查
-            // 4. 重写了基类的Equals必须也要重写GetHashCode方法
-            // 5. 可选：重载运算符，重写了Equals最好也要重载运算符
-            // 6. 解构方法：把对象拆分为多个变量
 
-        // 实现2：用record记录实现
-            // record是基于值的比较，能够自动实现上述class实现的所有代码，无需显式编写
+    }
+    public static class NumberTransformer
+    {
+        public static List<float> TransformNumbers1(List<float> input, Func<float, float> transform)
+        {
+            List<float> result = new List<float>();
 
+            foreach (var item in input)
+            {
+                float transformed = transform(item);
+                result.Add(transformed);
+            }
+            return result;
+        }
+
+        public static List<float> TransformNumbers2(List<float> input, Func<float, float> transform)
+        {
+            return input
+                .Select(transform)
+                .ToList();
+        }
+
+        public delegate float Multi(float num);
+        public static List<float> TransformNumbers3(List<float> input, Multi transform)
+        {
+            var result = new List<float>();
+            foreach (var num in input)
+            {
+                result.Add(transform(num));
+            }
+            return result;
+        }
+        public static List<float> TransformNumbers4(List<float> input, Multi transform)
+        {
+            return input
+                .Select(transform.Invoke)
+                .ToList();
+        }
     }
 }

@@ -15,41 +15,76 @@ namespace ProgrammingExercises100.Exercises
     {
         public void Run()
         {
-            Console.WriteLine("--- 练习 040: 定义基于值的房屋数据结构 ---");
+            Console.WriteLine("--- 练习 050: 展平嵌套的数字列表 ---");
             // 题目描述
-            string line = "定义一个House类型，带有Address属性、FloorArea属性、BedroomCount属性和HasGarage属性。需要满足基于值的相等性、不可变性、ToString方法、解构方法等。";
+            string line = "实现FlattenList方法，把一个嵌套List<List<int>>展平成List<int>";
             Console.WriteLine(line);
 
             // 准备一些测试数据
 
-
+            var nestedList = new List<List<int>>()
+            {
+                new List<int>(){ 1, 2, 3 },
+                new List<int>(){ 4, 5, 6 },
+                new List<int>(){ 7, 8 }
+            };
 
             // 调用你的逻辑方法
-
+            List<int> resultList = FlattenList1(nestedList);
 
             // 输出结果
-
+            foreach (int i in resultList)
+            {
+                Console.WriteLine(i);
+            }
 
         }
 
-
+        // 方法1：嵌套for
+        public static List<int> FlattenList1(List<List<int>> nestedList)
+        {
+            if (nestedList == null)
+                throw new ArgumentNullException();
+            List<int> resultList = new List<int>();
+            for (int i = 0; i < nestedList.Count; i++)
+            {
+                for (int j = 0; j < nestedList[i].Count; j++)
+                {
+                    resultList.Add(nestedList[i][j]);
+                }
+            }
+            return resultList;
+        }
+        // 方法2：嵌套foreach
+        public static List<int> FlattenList2(List<List<int>> nestedList)
+        {
+            if (nestedList == null)
+                throw new ArgumentNullException();
+            List<int> resultList = new List<int>();
+            foreach (var innerList in nestedList)
+            {
+                foreach (var item in innerList)
+                {
+                    resultList.Add(item);
+                }
+            }
+            return resultList;
+        }
+        // 方法3：LINQ SelectMany
+        public static List<int> FlattenList3(List<List<int>> nestedList)
+        {
+            if (nestedList == null)
+                throw new ArgumentNullException();
+            
+            return nestedList
+                .Where(innerList => innerList != null)
+                .SelectMany(innerList => innerList)
+                .ToList();
+        }
         //题目知识：
-        // 1. 题目要求：
-        // 基于值的相等性：比较两个House对象时，应该比较它们的属性值，而不是引用。实现IEquatable接口，实现Equals方法
-        // 不可变性：创建后属性值不能更改
-        // ToString方法：提供友好的字符串表示
-        // 解构方法：可以方便地将属性分解到变量中
+        // 1. 展平可以用循环，有几层就有几个循环
+        // 2. LINQ的SelectMany专门用来展平，SelectMany和Select内部遍历的是每个子对象，如果是嵌套List，则遍历的是内层List，不能继续下探到内层List内的元素。但是返回类型是不同的，Select返回的是子对象的类型，即IEnumerable<List<T>>,而SelectMany直接进行扁平化，返回的是子对象中泛型的类型，即IEnumerable<int>
 
-        // 实现1：用类实现
-            // 1. 重写 object.Equals 是必须的：因为很多旧的 API 或非泛型的类库（以及 System.Object 本身）只知道 Equals(object)。如果不重写它，当你把 House 放在非泛型容器里时，逻辑就会出错。重写后，运行时多态会根据实际类型调用Equals方法。
-            // 2. obj as House1：as安全地将object类型转换为House类型，转换成功返回一个House类型的对象，转换失败返回null
-            // 3. 实现IEquatable的Equals(House1? other)方法，调用类型安全的Equals，避免装箱，编译时类型检查
-            // 4. 重写了基类的Equals必须也要重写GetHashCode方法
-            // 5. 可选：重载运算符，重写了Equals最好也要重载运算符
-            // 6. 解构方法：把对象拆分为多个变量
-
-        // 实现2：用record记录实现
-            // record是基于值的比较，能够自动实现上述class实现的所有代码，无需显式编写
 
     }
 }
