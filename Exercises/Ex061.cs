@@ -15,13 +15,40 @@ namespace ProgrammingExercises100.Exercises
     {
         public void Run()
         {
-            Console.WriteLine("--- 练习 040: 定义基于值的房屋数据结构 ---");
+            Console.WriteLine("--- 练习 061: 当超过阈值时出发事件 ---");
             // 题目描述
-            string line = "定义一个House类型，带有Address属性、FloorArea属性、BedroomCount属性和HasGarage属性。需要满足基于值的相等性、不可变性、ToString方法、解构方法等。";
+            string line = "实现ThresholdCounter类，有一个公共的Increment方法，当内部计数超过给定的阈值时，触发一个自定义事件ThresholdExceeded。阈值应该在构造器传入，这个类应该有公共的Count属性跟踪Increment方法被调用多少次，还有一个EventHandler类的事件";
             Console.WriteLine(line);
 
             // 准备一些测试数据
 
+            // 测试1: 基本功能测试
+            Console.WriteLine("测试1: 基本功能测试");
+            Console.WriteLine("创建阈值=5的计数器");
+            ThresholdCounter counter1 = new ThresholdCounter(5);
+
+            // 订阅事件
+            counter1.ThresholdExceeded += (sender, e) =>
+            {
+                if (sender != null)
+                {
+                    Console.WriteLine($"事件触发: 计数已超过阈值！当前计数: {((ThresholdCounter)sender).Count}");
+                }
+            };
+            //3. 事件订阅
+            //+= 操作符添加事件处理器（订阅事件）
+            //使用lambda表达式作为事件处理方法
+            //sender是触发事件的对象
+            //e是事件参数（这里为空）
+
+            // 执行6次递增（应该在第6次触发事件）
+            Console.WriteLine("执行7次Increment():");
+            for (int i = 0; i < 7; i++)
+            {
+                counter1.Increment();
+                Console.WriteLine($"  第{i + 1}次调用 - Count = {counter1.Count}");
+            }
+            Console.WriteLine();
 
 
             // 调用你的逻辑方法
@@ -34,22 +61,44 @@ namespace ProgrammingExercises100.Exercises
 
 
         //题目知识：
-        // 1. 题目要求：
-        // 基于值的相等性：比较两个House对象时，应该比较它们的属性值，而不是引用。实现IEquatable接口，实现Equals方法
-        // 不可变性：创建后属性值不能更改
-        // ToString方法：提供友好的字符串表示
-        // 解构方法：可以方便地将属性分解到变量中
+        // 1. 事件（Event）是C#中的一种特殊委托，用于实现发布-订阅（Publisher-Subscriber）模式：发布者（Publisher）：触发事件的类（这里是ThresholdCounter）（Subscriber）：响应事件的代码
+        // 2. 执行过程：执行Increment() → Count++ → 检查条件 → 触发事件 → 执行订阅者的代码
+        // 3. ?. null条件运算符：只有当左侧事件ThresholdExceeded不为null（即有订阅者）时才调用
+        // 4. Invoke()触发事件，通知所有订阅者 ，this是事件源（谁触发了事件），EventArgs.Empty表示不传递额外数据
+        // 5. 订阅事件：左侧是事件  +=是订阅操作符   右侧是事件发生后要调用的方法名，这里是用lambda来表示匿名方法了，表示方法接收从发布者处传来的object? sender和 EventArgs e，因为sender是this也就是事件源ThresholdCounter的对象，所以sender包含了这个类的属性，因此可以进行拆箱后调用
+        // 6. 标识符是巧妙的方法，让事件只触发一次
 
-        // 实现1：用类实现
-            // 1. 重写 object.Equals 是必须的：因为很多旧的 API 或非泛型的类库（以及 System.Object 本身）只知道 Equals(object)。如果不重写它，当你把 House 放在非泛型容器里时，逻辑就会出错。重写后，运行时多态会根据实际类型调用Equals方法。
-            // 2. obj as House1：as安全地将object类型转换为House类型，转换成功返回一个House类型的对象，转换失败返回null
-            // 3. 实现IEquatable的Equals(House1? other)方法，调用类型安全的Equals，避免装箱，编译时类型检查
-            // 4. 重写了基类的Equals必须也要重写GetHashCode方法
-            // 5. 可选：重载运算符，重写了Equals最好也要重载运算符
-            // 6. 解构方法：把对象拆分为多个变量
+    }
 
-        // 实现2：用record记录实现
-            // record是基于值的比较，能够自动实现上述class实现的所有代码，无需显式编写
+    public class ThresholdCounter
+    {
+        private readonly int _threshold;
+        private bool _eventRaised = false;
+        public int Count { get; private set; }
+        public event EventHandler? ThresholdExceeded;
+        //1. 定义事件
+        //EventHandler是内置的委托类型，用于处理不包含事件数据的事件
+        //? 表示事件可以为null（当没有订阅者时）
+        //这是事件的发布者端声明
+        public ThresholdCounter(int threshold)
+        {
+            _threshold = threshold;
+        }
 
+        public void Increment()
+        {
+            Count++;
+
+            if (!_eventRaised && Count > _threshold)
+            {
+                _eventRaised = true;
+                ThresholdExceeded?.Invoke(this, EventArgs.Empty);
+                //2. 事件触发
+                //?.是null条件运算符：只有当ThresholdExceeded不为null（即有订阅者）时才调用
+                //Invoke()触发事件，通知所有订阅者
+                //this是事件源（谁触发了事件）
+                //EventArgs.Empty表示不传递额外数据
+            }
+        }
     }
 }

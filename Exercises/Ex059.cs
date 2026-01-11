@@ -15,41 +15,71 @@ namespace ProgrammingExercises100.Exercises
     {
         public void Run()
         {
-            Console.WriteLine("--- 练习 040: 定义基于值的房屋数据结构 ---");
+            Console.WriteLine("--- 练习 059: 反转泛型数组 ---");
             // 题目描述
-            string line = "定义一个House类型，带有Address属性、FloorArea属性、BedroomCount属性和HasGarage属性。需要满足基于值的相等性、不可变性、ToString方法、解构方法等。";
+            string line = "实现static ReverseArray方法，接收泛型类型，返回一个新的反转后的数组";
             Console.WriteLine(line);
 
             // 准备一些测试数据
 
-
+            int[] arr = [0, 1, 2, 3, 4, 5];
 
             // 调用你的逻辑方法
+            var result1 = ArrayUtils.ReverseArray1(arr);
+            var result2 = ArrayUtils.ReverseArray2(arr);
+            var result3 = ArrayUtils.ReverseArray3(arr);
+            var result4 = ArrayUtils.ReverseArray4(arr);
 
 
             // 输出结果
-
+            for (int i = 0; i < arr.Length; i++)
+            {
+                Console.WriteLine(result1[i]);
+                Console.WriteLine(result2[i]);
+                Console.WriteLine(result3[i]);
+                Console.WriteLine(result4[i]);
+                Console.WriteLine();
+            }
 
         }
 
 
         //题目知识：
-        // 1. 题目要求：
-        // 基于值的相等性：比较两个House对象时，应该比较它们的属性值，而不是引用。实现IEquatable接口，实现Equals方法
-        // 不可变性：创建后属性值不能更改
-        // ToString方法：提供友好的字符串表示
-        // 解构方法：可以方便地将属性分解到变量中
+        // 1. 使用手动方式反转数组是最高效的
+        // 2. 使用LINQ的Reverse方法，创建新的数组对象，然后进行反转，可读性最高。LINQ的Reverse和Array.Reverse静态方法是不同的，Array.Reverse让数组本身反转
+        // 3. LINQ的Select确实会创建新的对象，但是在这里是多余的，因为Reverse本就能创建新的对象，不影响原数组
+        // 4. 使用CopyTo做的是浅拷贝，如果是值类型变量做浅拷贝，其行为是深拷贝的行为，即修改一处不会修改原处。如果是引用类型的变量，则完全是浅拷贝的行为，修改会同步。值类型：int double 等，引用类型：string object 自定义类等。注意string虽然是引用类型，但是string具有不可变性，实际上还是创建了新的string对象。
+        // 5. 泛型方法，一定要给方法名称后面加上<T>
 
-        // 实现1：用类实现
-            // 1. 重写 object.Equals 是必须的：因为很多旧的 API 或非泛型的类库（以及 System.Object 本身）只知道 Equals(object)。如果不重写它，当你把 House 放在非泛型容器里时，逻辑就会出错。重写后，运行时多态会根据实际类型调用Equals方法。
-            // 2. obj as House1：as安全地将object类型转换为House类型，转换成功返回一个House类型的对象，转换失败返回null
-            // 3. 实现IEquatable的Equals(House1? other)方法，调用类型安全的Equals，避免装箱，编译时类型检查
-            // 4. 重写了基类的Equals必须也要重写GetHashCode方法
-            // 5. 可选：重载运算符，重写了Equals最好也要重载运算符
-            // 6. 解构方法：把对象拆分为多个变量
-
-        // 实现2：用record记录实现
-            // record是基于值的比较，能够自动实现上述class实现的所有代码，无需显式编写
-
+    }
+    public static class ArrayUtils
+    {
+        public static T[] ReverseArray1<T>(T[] input)
+        {
+            T[] result = new T[input.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = input[input.Length - 1 - i];
+            }
+            return result;
+        }
+        public static T[] ReverseArray2<T>(T[] input)
+        {
+            return input.Reverse().ToArray();
+        }
+        public static T[] ReverseArray3<T>(T[] input)
+        {
+            return input
+                .Select(n => n)
+                .Reverse()
+                .ToArray();
+        }
+        public static T[] ReverseArray4<T>(T[] input)
+        {
+            var result = (T[])input.Clone();
+            return result
+                .Reverse()
+                .ToArray();
+        }
     }
 }
