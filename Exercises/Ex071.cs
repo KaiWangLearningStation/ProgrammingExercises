@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Mail;
 using System.Net.NetworkInformation;
+using System.Numerics;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,41 +16,47 @@ namespace ProgrammingExercises100.Exercises
     {
         public void Run()
         {
-            Console.WriteLine("--- 练习 040: 定义基于值的房屋数据结构 ---");
+            Console.WriteLine("--- 练习 071: 使用INumber<T> 约束计算平均值 ---");
             // 题目描述
-            string line = "定义一个House类型，带有Address属性、FloorArea属性、BedroomCount属性和HasGarage属性。需要满足基于值的相等性、不可变性、ToString方法、解构方法等。";
+            string line = "使用普通的计算平均值的方法，需要绑定特定的数据类型，例如int、long、double等。.NET7引入的泛型数学功能，通过实现INumber接口，可以支持所有的数据类型，避免了多个重载版本的编写。" +
+                "实现泛型方法CalculateAverage<TNumber>，接收任何实现了INumber<TNumber>的数字类型。方法返回平均值";
             Console.WriteLine(line);
 
             // 准备一些测试数据
 
+            double[] doubles = { 1.0, 2.0, 3.0, 4.0 };
+            decimal[] decimals = { 1.0m, 2.0m, 3.0m, 4.0m };
 
 
             // 调用你的逻辑方法
-
-
+            var result1 = MathUtils.CalculateAverage(doubles);
+            var result2 = MathUtils.CalculateAverage(decimals);
             // 输出结果
-
+            Console.WriteLine(result1);
+            Console.WriteLine(result2);
 
         }
 
 
         //题目知识：
-        // 1. 题目要求：
-        // 基于值的相等性：比较两个House对象时，应该比较它们的属性值，而不是引用。实现IEquatable接口，实现Equals方法
-        // 不可变性：创建后属性值不能更改
-        // ToString方法：提供友好的字符串表示
-        // 解构方法：可以方便地将属性分解到变量中
+        // 1. where是用来表示泛型约束的，表示传入的TNumber要求都实现了INumber接口
+        // 2. `TNumber` 是一个** 泛型类型参数**，名称是可以自定义的，这个泛型类型参数是`CalculateAverage<TNumber>`定义的
+        // 3. **内置的数值类型** 实现了 `INumber<T>`：int, long, short, byte, sbyte, float, double, decimal, nint, nuint，这些类型可以直接传入这个方法中，因为符合** 泛型约束**
+        // 4. 使用泛型数学类型，不能用常规的int中的0值，而是要用INumber中实现的Zero属性表示0
+        // 5. 也不能用Length属性直接转换为TNumber类型，要用CreateChecked方法进行安全转化才行
 
-        // 实现1：用类实现
-            // 1. 重写 object.Equals 是必须的：因为很多旧的 API 或非泛型的类库（以及 System.Object 本身）只知道 Equals(object)。如果不重写它，当你把 House 放在非泛型容器里时，逻辑就会出错。重写后，运行时多态会根据实际类型调用Equals方法。
-            // 2. obj as House1：as安全地将object类型转换为House类型，转换成功返回一个House类型的对象，转换失败返回null
-            // 3. 实现IEquatable的Equals(House1? other)方法，调用类型安全的Equals，避免装箱，编译时类型检查
-            // 4. 重写了基类的Equals必须也要重写GetHashCode方法
-            // 5. 可选：重载运算符，重写了Equals最好也要重载运算符
-            // 6. 解构方法：把对象拆分为多个变量
-
-        // 实现2：用record记录实现
-            // record是基于值的比较，能够自动实现上述class实现的所有代码，无需显式编写
-
+    }
+    public static class MathUtils
+    {
+        public static TNumber CalculateAverage<TNumber>(TNumber[] numbers) where TNumber : INumber<TNumber>
+        {
+            TNumber sum = TNumber.Zero;
+            foreach (var item in numbers)
+            {
+                sum += item;
+            }
+            TNumber count = TNumber.CreateChecked(numbers.Length);
+            return sum / count;
+        }
     }
 }
