@@ -15,26 +15,50 @@ namespace ProgrammingExercises100.Exercises
     {
         public void Run()
         {
-            Console.WriteLine("--- 练习 0:  ---");
+            Console.WriteLine("--- 练习 90: 展平并筛选锯齿字符串数组 ---");
             // 题目描述
-            string line = "";
+            string line = "实现FlattenAndFilterWords方法，接收一个锯齿数组string[][]，和一个最小单词长度int。首先把锯齿数组展平成一个序列，去掉首位空格，筛选不小于长度的单词，返回一个去重的、按照字母表排序的剩余单词列表";
             Console.WriteLine(line);
 
             // 准备一些测试数据
 
+            // 使用初始化器创建和初始化锯齿数组
+            string?[][] words = new string?[][]
+            {
+                new string?[] { "apple", "banana", "cherry", "date",null },
+                new string[] { "elephant", "fox", "       " },
+                new string[] { "grape", "honeydew", "kiwi", "lemon", "mango" },
+                new string[] { "north", "ocean", "planet" },
+                new string[] { "quantum", "rainbow", "sun", "tree", "umbrella", "vortex", "water" }
+            };
 
 
             // 调用你的逻辑方法
-
+            var result = JaggedArrayUtils.FlattenAndFilterWords(words, 5);
 
             // 输出结果
-
+            foreach (var item in result)
+            {
+                Console.WriteLine(item);
+            }
         }
 
 
         //题目知识：
-        // 1. 
-        // 2. 
+        // 1. 表达式集合可以缩减语法 new string[] { "apple", "banana", "cherry", "date" },简化为["apple", "banana", "cherry", "date"]
+        // 2. 复合LINQ操作实例：
     }
-
+    public static class JaggedArrayUtils
+    {
+        public static List<string> FlattenAndFilterWords(string[][] words, int minLength)
+        {
+            return words
+                .SelectMany(word => word)
+                .Select(word => word.Trim())
+                .Where(word => !string.IsNullOrEmpty(word) && word.Length >= minLength)
+                .Distinct()
+                .OrderBy(word => word)
+                .ToList();
+        }
+    }
 }
