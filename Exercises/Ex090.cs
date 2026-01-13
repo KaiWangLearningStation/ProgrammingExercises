@@ -45,15 +45,15 @@ namespace ProgrammingExercises100.Exercises
 
 
         //题目知识：
-        // 1. 表达式集合可以缩减语法 new string[] { "apple", "banana", "cherry", "date" },简化为["apple", "banana", "cherry", "date"]
-        // 2. 复合LINQ操作实例：
+        // 1. 集合表达式可以缩减语法 new string[] { "apple", "banana", "cherry", "date" },简化为["apple", "banana", "cherry", "date"]只能用在数组、列表、和实现了ICollection/IList的类型
+        // 2. 复合LINQ操作实例： selectmany如果不含内容时，会抛出异常，解决办法是用空接合操作符。如果不为空为左侧值，为空为右侧值
     }
     public static class JaggedArrayUtils
     {
         public static List<string> FlattenAndFilterWords(string[][] words, int minLength)
         {
             return words
-                .SelectMany(word => word)
+                .SelectMany(word => word ?? Array.Empty<string>())
                 .Select(word => word.Trim())
                 .Where(word => !string.IsNullOrEmpty(word) && word.Length >= minLength)
                 .Distinct()
