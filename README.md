@@ -1,1 +1,2 @@
-# 100 Programming Exercises
+# 100 Programming Exercises - By Krystyna Ślusarczyk
+This is a complete C# project implementing all 100 programming exercises designed by Krystyna Ślusarczyk. The project follows object-oriented principles and includes the main entry point Program.cs, the exercise interface IExercise.cs, and organized implementations of each exercise in the Exercises/ directory. All code has been compiled and tested, making it an excellent reference for C# learners.
