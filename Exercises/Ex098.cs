@@ -29,7 +29,7 @@ namespace ProgrammingExercises100.Exercises
             };
 
             // 调用你的逻辑方法
-            var result = AnagramGrouper.GroupAnagrams(words);
+            var result = AnagramGrouper.GroupAnagrams2(words);
 
             // 输出结果
             foreach (var word in result)
@@ -46,15 +46,32 @@ namespace ProgrammingExercises100.Exercises
         //题目知识：
         // 1. .GroupBy(word => new string(word.OrderBy(character => character).ToArray()))这个lambda表达式的目的就是：为每个单词生成一个唯一的"字母签名"，相同字母组成的单词会有相同的签名，不同字母组成的单词签名不同。
         // 2. Grouping对象使用ToList方法只保留除了key以外的部分
+        // 3. 如果不使用LINQ，可以采用Dictionary，把所有的排序后的单词作为Key，单词本身作为value。使用的是string的Order方法，不需要传参数。不使用str.Order方法能够提高速度。用Array.Sort静态方法处理char[]数据，速度更快
     }
     public static class AnagramGrouper
     {
-        public static List<List<string>> GroupAnagrams(List<string> words)
+        public static List<List<string>> GroupAnagrams1(List<string> words)
         {
             return words
                 .GroupBy(word => new string(word.OrderBy(character => character).ToArray()))
                 .Select(group => group.ToList())
                 .ToList();
+        }
+        public static List<List<string>> GroupAnagrams2(List<string> words)
+        {
+            Dictionary<string, List<string>> dic = new();
+            foreach (var str in words)
+            {
+                char[] chars = str.ToCharArray();
+                Array.Sort(chars);
+                string key = new string(chars);
+                if (!dic.ContainsKey(key))
+                {
+                    dic[key] = new List<string>();
+                }
+                dic[key].Add(str);
+            }
+            return dic.Values.ToList();
         }
     }
 }
